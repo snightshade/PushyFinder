@@ -17,13 +17,15 @@ public class NtfyDelivery : IDelivery
         Task.Run(() => DeliverAsync(title, text));
     }
 
-    private static async void DeliverAsync(string title, string text)
+    private static async Task DeliverAsync(string title, string text)
     {
         // Assuming `title` is used as the main message
         // Since ntfy doesn't have a separate title field, you can prepend it to the message or just send the message
         var args = string.IsNullOrEmpty(title) ? text : $"{title}: {text}";
        
-        var request = new FlurlRequest(Plugin.Configuration.NtfyServer);
+        IFlurlRequest request = new FlurlRequest(Plugin.Configuration.NtfyServer);
+        if (!Plugin.Configuration.NtfyTopic.IsNullOrWhitespace())
+            request = request.AppendPathSegment(Plugin.Configuration.NtfyTopic);
         if (!Plugin.Configuration.NtfyToken.IsNullOrWhitespace())
             request = request.WithOAuthBearerToken(Plugin.Configuration.NtfyToken);
 

@@ -17,8 +17,7 @@ internal class DiscordDelivery : IDelivery
         Task.Run(() => DeliverAsync(title, text));
     }
 
-    // very basic discord implementation to ride off the same delivery method could be extended later to be more feature rich if needed
-    private static async void DeliverAsync(string title, string text)
+    private static async Task DeliverAsync(string title, string text)
     {
         var webhook = new WebhookBuilder();
 
@@ -30,7 +29,7 @@ internal class DiscordDelivery : IDelivery
                               .WithDescription(text)
                               .WithTitle(title)
                               .WithColor(Plugin.Configuration.DiscordEmbedColor)
-                              .WithAuthor("PushyFinder", "https://github.com/lostkagamine/PushyFinder",
+                              .WithAuthor("PushyFinder", "https://github.com/snightshade/PushyFinder",
                                           "https://raw.githubusercontent.com/goatcorp/PluginDistD17/main/stable/PushyFinder/images/icon.png"));
         }
 

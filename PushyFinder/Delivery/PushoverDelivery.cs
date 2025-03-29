@@ -18,7 +18,7 @@ public class PushoverDelivery : IDelivery
         Task.Run(() => DeliverAsync(title, text));
     }
 
-    private static async void DeliverAsync(string title, string text)
+    private static async Task DeliverAsync(string title, string text)
     {
         var args = new Dictionary<string, string>
         {
