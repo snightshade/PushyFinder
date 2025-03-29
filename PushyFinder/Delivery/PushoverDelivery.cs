@@ -7,7 +7,7 @@ namespace PushyFinder.Delivery;
 
 public class PushoverDelivery : IDelivery
 {
-    public static readonly string PUSHOVER_API = "https://api.pushover.net/1/messages.json";
+    public static readonly string PushoverApi = "https://api.pushover.net/1/messages.json";
 
     public bool IsActive => !Plugin.Configuration.PushoverAppKey.IsNullOrWhitespace() &&
                             !Plugin.Configuration.PushoverDevice.IsNullOrWhitespace() &&
@@ -31,7 +31,7 @@ public class PushoverDelivery : IDelivery
 
         try
         {
-            await PUSHOVER_API.PostJsonAsync(args);
+            await PushoverApi.PostJsonAsync(args);
             Service.PluginLog.Debug("Sent Pushover message");
         }
         catch (FlurlHttpException e)
