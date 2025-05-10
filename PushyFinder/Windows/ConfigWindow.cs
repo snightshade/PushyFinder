@@ -59,6 +59,10 @@ public class ConfigWindow : Window, IDisposable
     private void DrawDiscordConfig()
     {
         {
+            var cfg = Configuration.DiscordMessage;
+            if (ImGui.InputText("Message", ref cfg, 2048u)) Configuration.DiscordMessage = cfg;
+        }
+        {
             var cfg = Configuration.DiscordWebhookToken;
             if (ImGui.InputText("Webhook URL", ref cfg, 2048u)) Configuration.DiscordWebhookToken = cfg;
         }
