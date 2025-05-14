@@ -9,7 +9,7 @@ namespace PushyFinder.Delivery;
 
 internal class DiscordDelivery : IDelivery
 {
-    public bool IsActive => !Plugin.Configuration.DiscordWebhookToken.IsNullOrWhitespace() && 
+    public bool IsActive => !Plugin.Configuration.DiscordWebhookToken.IsNullOrWhitespace() &&
                             Uri.IsWellFormedUriString(Plugin.Configuration.DiscordWebhookToken, UriKind.Absolute);
 
     public void Deliver(string title, string text)
@@ -25,7 +25,9 @@ internal class DiscordDelivery : IDelivery
             webhook.WithContent(title + "\n" + text);
         else
         {
-            webhook.WithEmbed(new EmbedBuilder()
+            webhook
+                .WithContent(Plugin.Configuration.DiscordMessage)
+                .WithEmbed(new EmbedBuilder()
                               .WithDescription(text)
                               .WithTitle(title)
                               .WithColor(Plugin.Configuration.DiscordEmbedColor)
