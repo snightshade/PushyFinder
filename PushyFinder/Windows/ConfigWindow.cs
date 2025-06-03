@@ -56,6 +56,22 @@ public class ConfigWindow : Window, IDisposable
         }
     }
 
+    private void DrawSimplepushConfig()
+    {
+        {
+            var cfg = Configuration.SimplepushKey;
+            if (ImGui.InputText("Key (required)", ref cfg, 2048u)) Configuration.SimplepushKey = cfg;
+        }
+        {
+            var cfg = Configuration.SimplepushTitle;
+            if (ImGui.InputText("Title", ref cfg, 2048u)) Configuration.SimplepushTitle = cfg;
+        }
+        {
+            var cfg = Configuration.SimplepushEvent;
+            if (ImGui.InputText("Event", ref cfg, 2048u)) Configuration.SimplepushEvent = cfg;
+        }
+    }
+
     private void DrawDiscordConfig()
     {
         {
@@ -97,6 +113,10 @@ public class ConfigWindow : Window, IDisposable
                 using (var ntfyTab = ImRaii.TabItem("Ntfy"))
                 {
                     if (ntfyTab) DrawNtfyConfig();
+                }
+                using (var ntfyTab = ImRaii.TabItem("Simplepush"))
+                {
+                    if (ntfyTab) DrawSimplepushConfig();
                 }
                 using (var discordTab = ImRaii.TabItem("Discord"))
                 {
