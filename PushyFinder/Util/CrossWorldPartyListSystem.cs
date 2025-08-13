@@ -6,34 +6,42 @@ using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace PushyFinder.Util;
 
-public static class CrossWorldPartyListSystem
+public class CrossWorldPartyListSystem
 {
     public delegate void CrossWorldJoinDelegate(CrossWorldMember m);
-
     public delegate void CrossWorldLeaveDelegate(CrossWorldMember m);
 
-    private static readonly List<CrossWorldMember> members = new();
-    private static List<CrossWorldMember> oldMembers = new();
+    private readonly List<CrossWorldMember> members = new();
+    private List<CrossWorldMember> oldMembers = new();
 
-    public static event CrossWorldJoinDelegate? OnJoin;
-    public static event CrossWorldLeaveDelegate? OnLeave;
+    public event CrossWorldJoinDelegate? OnJoin;
+    public event CrossWorldLeaveDelegate? OnLeave;
 
-    public static void Start()
+    private readonly IFramework framework;
+    private readonly IClientState clientState;
+
+    public CrossWorldPartyListSystem(IFramework framework, IClientState clientState)
     {
-        Service.Framework.Update += Update;
+        this.framework = framework;
+        this.clientState = clientState;
     }
 
-    public static void Stop()
+    public void Start()
     {
-        Service.Framework.Update -= Update;
+        framework.Update += Update;
     }
 
-    private static bool ListContainsMember(List<CrossWorldMember> l, CrossWorldMember m)
+    public void Stop()
+    {
+        framework.Update -= Update;
+    }
+
+    private bool ListContainsMember(List<CrossWorldMember> l, CrossWorldMember m)
         => l.Any(a => a.Name == m.Name);
 
-    private static unsafe void Update(IFramework framework)
+    private unsafe void Update(IFramework framework)
     {
-        if (!Service.ClientState.IsLoggedIn)
+        if (!clientState.IsLoggedIn)
             return;
 
         if (!InfoProxyCrossRealm.IsCrossRealmParty())

@@ -2,25 +2,25 @@ using System.Collections.Generic;
 
 namespace PushyFinder.Delivery;
 
-internal interface IDelivery
+// Change 'internal' to 'public' here
+public interface IDelivery
 {
     public bool IsActive { get; }
     public void Deliver(string title, string text);
 }
 
-public static class MasterDelivery
+public class MasterDelivery
 {
-    private static readonly IReadOnlyList<IDelivery> Deliveries =
-    [
-        new PushoverDelivery(),
-        new NtfyDelivery(),
-        new SimplepushDelivery(),
-        new DiscordDelivery()
-    ];
+    private readonly IReadOnlyList<IDelivery> deliveries;
 
-    public static void Deliver(string title, string text)
+    public MasterDelivery(IReadOnlyList<IDelivery> deliveries)
     {
-        foreach (var delivery in Deliveries)
+        this.deliveries = deliveries;
+    }
+
+    public void Deliver(string title, string text)
+    {
+        foreach (var delivery in deliveries)
             if (delivery.IsActive)
                 delivery.Deliver(title, text);
     }

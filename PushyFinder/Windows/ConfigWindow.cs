@@ -1,10 +1,8 @@
 using System;
 using System.Numerics;
-using System.Text;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
-
 using PushyFinder.Delivery;
 using PushyFinder.Util;
 
@@ -12,148 +10,127 @@ namespace PushyFinder.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
-    private readonly Configuration Configuration;
+    private readonly Configuration configuration;
+    private readonly MasterDelivery masterDelivery;
+    private readonly CharacterUtil characterUtil;
 
     private readonly TimedBool notifSentMessageTimer = new(3.0f);
 
-    public ConfigWindow(Plugin plugin) : base(
+    public ConfigWindow(Configuration configuration, MasterDelivery masterDelivery, CharacterUtil characterUtil) : base(
         "PushyFinder Configuration",
-        ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
-        ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.AlwaysAutoResize)
+        ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize)
     {
-        Configuration = Plugin.Configuration;
+        this.configuration = configuration;
+        this.masterDelivery = masterDelivery;
+        this.characterUtil = characterUtil;
     }
 
     public void Dispose() { }
 
     private void DrawPushoverConfig()
     {
+        var appKey = this.configuration.PushoverAppKey ?? "";
+        if (ImGui.InputText("Application key", ref appKey, 30))
         {
-            var cfg = Configuration.PushoverAppKey;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Application key", buffer))
-            {
-                Configuration.PushoverAppKey = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.PushoverAppKey = appKey;
+            this.configuration.Save();
         }
+
+        var userKey = this.configuration.PushoverUserKey ?? "";
+        if (ImGui.InputText("User key", ref userKey, 30))
         {
-            var cfg = Configuration.PushoverUserKey;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("User key", buffer))
-            {
-                Configuration.PushoverUserKey = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.PushoverUserKey = userKey;
+            this.configuration.Save();
         }
+        
+        var device = this.configuration.PushoverDevice ?? "";
+        if (ImGui.InputText("Device name (optional)", ref device, 25))
         {
-            var cfg = Configuration.PushoverDevice;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Device name", buffer))
-            {
-                Configuration.PushoverDevice = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.PushoverDevice = device;
+            this.configuration.Save();
         }
     }
 
     private void DrawNtfyConfig()
     {
+        var server = this.configuration.NtfyServer ?? "";
+        if (ImGui.InputText("Server", ref server, 128))
         {
-            var cfg = Configuration.NtfyServer;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Server", buffer))
-            {
-                Configuration.NtfyServer = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.NtfyServer = server;
+            this.configuration.Save();
         }
+
+        var topic = this.configuration.NtfyTopic ?? "";
+        if (ImGui.InputText("Topic", ref topic, 64))
         {
-            var cfg = Configuration.NtfyTopic;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Topic", buffer))
-            {
-                Configuration.NtfyTopic = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.NtfyTopic = topic;
+            this.configuration.Save();
         }
+        
+        var token = this.configuration.NtfyToken ?? "";
+        if (ImGui.InputText("Token (optional)", ref token, 128))
         {
-            var cfg = Configuration.NtfyToken;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Token (if exists)", buffer))
-            {
-                Configuration.NtfyToken = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.NtfyToken = token;
+            this.configuration.Save();
         }
     }
 
     private void DrawSimplepushConfig()
     {
+        var key = this.configuration.SimplepushKey ?? "";
+        if (ImGui.InputText("Key", ref key, 16))
         {
-            var cfg = Configuration.SimplepushKey;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Key (required)", buffer))
-            {
-                Configuration.SimplepushKey = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.SimplepushKey = key;
+            this.configuration.Save();
         }
+
+        var title = this.configuration.SimplepushTitle ?? "";
+        if (ImGui.InputText("Title (optional)", ref title, 64))
         {
-            var cfg = Configuration.SimplepushTitle;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Title", buffer))
-            {
-                Configuration.SimplepushTitle = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.SimplepushTitle = title;
+            this.configuration.Save();
         }
+
+        var ev = this.configuration.SimplepushEvent ?? "";
+        if (ImGui.InputText("Event (optional)", ref ev, 64))
         {
-            var cfg = Configuration.SimplepushEvent;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Event", buffer))
-            {
-                Configuration.SimplepushEvent = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.SimplepushEvent = ev;
+            this.configuration.Save();
         }
     }
 
     private void DrawDiscordConfig()
     {
+        var webhookUrl = this.configuration.DiscordWebhookToken ?? "";
+        if (ImGui.InputText("Webhook URL", ref webhookUrl, 200))
         {
-            var cfg = Configuration.DiscordMessage;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Message", buffer))
-            {
-                Configuration.DiscordMessage = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.DiscordWebhookToken = webhookUrl;
+            this.configuration.Save();
         }
+
+        var message = this.configuration.DiscordMessage ?? "";
+        if (ImGui.InputText("Message", ref message, 256))
         {
-            var cfg = Configuration.DiscordWebhookToken;
-            var buffer = Encoding.UTF8.GetBytes(cfg);
-            Array.Resize(ref buffer, 2048);
-            if (ImGui.InputText("Webhook URL", buffer))
-            {
-                Configuration.DiscordWebhookToken = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
-            }
+            this.configuration.DiscordMessage = message;
+            this.configuration.Save();
         }
+
+        var useEmbed = this.configuration.DiscordUseEmbed;
+        if (ImGui.Checkbox("Use embeds?", ref useEmbed))
         {
-            var cfg = Configuration.DiscordUseEmbed;
-            if (ImGui.Checkbox("Use embeds?", ref cfg)) Configuration.DiscordUseEmbed = cfg;
+            this.configuration.DiscordUseEmbed = useEmbed;
+            this.configuration.Save();
         }
+        
+        var vec3Col = new Vector3();
+        var cfg = this.configuration.DiscordEmbedColor;
+        vec3Col.X = ((cfg >> 16) & 0xFF) / 255.0f;
+        vec3Col.Y = ((cfg >> 8) & 0xFF) / 255.0f;
+        vec3Col.Z = (cfg & 0xFF) / 255.0f;
+        if (ImGui.ColorEdit3("Embed color", ref vec3Col))
         {
-            var vec3Col = new Vector3();
-            var cfg = Configuration.DiscordEmbedColor;
-            vec3Col.X = ((cfg >> 16) & 0xFF) / 255.0f;
-            vec3Col.Y = ((cfg >> 8) & 0xFF) / 255.0f;
-            vec3Col.Z = (cfg & 0xFF) / 255.0f;
-            if (ImGui.ColorEdit3("Embed color", ref vec3Col))
-            {
-                cfg = ((uint)(vec3Col.X * 255) << 16) | ((uint)(vec3Col.Y * 255) << 8) | (uint)(vec3Col.Z * 255);
-                Configuration.DiscordEmbedColor = cfg;
-            }
+            this.configuration.DiscordEmbedColor = ((uint)(vec3Col.X * 255) << 16) | ((uint)(vec3Col.Y * 255) << 8) | (uint)(vec3Col.Z * 255);
+            this.configuration.Save();
         }
     }
 
@@ -161,33 +138,32 @@ public class ConfigWindow : Window, IDisposable
     {
         using (var tabBar = ImRaii.TabBar("Services"))
         {
-            if (tabBar)
+            if (!tabBar) return;
+            
+            using (var pushoverTab = ImRaii.TabItem("Pushover"))
             {
-                using (var pushoverTab = ImRaii.TabItem("Pushover"))
-                {
-                    if (pushoverTab) DrawPushoverConfig();
-                }
-                using (var ntfyTab = ImRaii.TabItem("Ntfy"))
-                {
-                    if (ntfyTab) DrawNtfyConfig();
-                }
-                using (var ntfyTab = ImRaii.TabItem("Simplepush"))
-                {
-                    if (ntfyTab) DrawSimplepushConfig();
-                }
-                using (var discordTab = ImRaii.TabItem("Discord"))
-                {
-                    if (discordTab) DrawDiscordConfig();
-                }
+                if (pushoverTab) DrawPushoverConfig();
+            }
+            using (var ntfyTab = ImRaii.TabItem("Ntfy"))
+            {
+                if (ntfyTab) DrawNtfyConfig();
+            }
+            using (var simplepushTab = ImRaii.TabItem("Simplepush"))
+            {
+                if (simplepushTab) DrawSimplepushConfig();
+            }
+            using (var discordTab = ImRaii.TabItem("Discord"))
+            {
+                if (discordTab) DrawDiscordConfig();
             }
         }
 
-        ImGui.NewLine();
+        ImGui.Separator();
 
         if (ImGui.Button("Send test notification"))
         {
             notifSentMessageTimer.Start();
-            MasterDelivery.Deliver("Test notification",
+            masterDelivery.Deliver("Test notification",
                                    "If you received this, PushyFinder is configured correctly.");
         }
 
@@ -197,22 +173,30 @@ public class ConfigWindow : Window, IDisposable
             ImGui.Text("Notification sent!");
         }
 
+        ImGui.Separator();
+        
+        var enablePops = this.configuration.EnableForDutyPops;
+        if (ImGui.Checkbox("Send message for duty pop?", ref enablePops))
         {
-            var cfg = Configuration.EnableForDutyPops;
-            if (ImGui.Checkbox("Send message for duty pop?", ref cfg)) Configuration.EnableForDutyPops = cfg;
-        }
-        {
-            var cfg = Configuration.IgnoreAfkStatus;
-            if (ImGui.Checkbox("Ignore AFK status and always notify", ref cfg)) Configuration.IgnoreAfkStatus = cfg;
+            this.configuration.EnableForDutyPops = enablePops;
+            this.configuration.Save();
         }
 
-        if (!Configuration.IgnoreAfkStatus)
+        var ignoreAfk = this.configuration.IgnoreAfkStatus;
+        if (ImGui.Checkbox("Ignore AFK status and always notify", ref ignoreAfk))
         {
-            if (!CharacterUtil.IsClientAfk())
+            this.configuration.IgnoreAfkStatus = ignoreAfk;
+            this.configuration.Save();
+        }
+
+        if (!configuration.IgnoreAfkStatus)
+        {
+            ImGui.Dummy(new Vector2(0.0f, 5.0f));
+            if (!characterUtil.IsClientAfk())
             {
-                var red = new Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-                ImGui.TextColored(red, "This plugin will only function while your client is AFK (/afk, red icon)!");
-
+                var red = new Vector4(1.0f, 0.2f, 0.2f, 1.0f);
+                ImGui.TextColored(red, "Plugin is inactive (you are not AFK).");
+                
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
@@ -224,15 +208,17 @@ public class ConfigWindow : Window, IDisposable
             }
             else
             {
-                var green = new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-                ImGui.TextColored(green, "You are AFK. The plugin is active and notifications will be served.");
+                var green = new Vector4(0.2f, 1.0f, 0.2f, 1.0f);
+                ImGui.TextColored(green, "Plugin is active (you are AFK).");
             }
         }
 
-        if (ImGui.Button("Save and close"))
+        ImGui.Dummy(new Vector2(0.0f, 10.0f));
+
+        if (ImGui.Button("Save and Close"))
         {
-            Configuration.Save();
-            IsOpen = false;
+            this.configuration.Save();
+            this.IsOpen = false;
         }
     }
 }

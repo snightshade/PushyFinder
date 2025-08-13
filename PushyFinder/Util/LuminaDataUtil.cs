@@ -1,13 +1,21 @@
 using System.Linq;
+using Dalamud.Plugin.Services;
 using Lumina.Excel.Sheets;
 
 namespace PushyFinder.Util;
 
-public static class LuminaDataUtil
+public class LuminaDataUtil
 {
-    public static string GetJobAbbreviation(uint jobId)
+    private readonly IDataManager dataManager;
+
+    public LuminaDataUtil(IDataManager dataManager)
     {
-        var jobEnum = Service.DataManager.GetExcelSheet<ClassJob>()
+        this.dataManager = dataManager;
+    }
+
+    public string GetJobAbbreviation(uint jobId)
+    {
+        var jobEnum = dataManager.GetExcelSheet<ClassJob>()
                              .Where(a => a.RowId == jobId);
         var job = jobEnum.FirstOrDefault();
         return job.Abbreviation.ToString();

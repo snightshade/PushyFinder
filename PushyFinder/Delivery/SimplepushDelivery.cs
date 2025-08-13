@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Flurl.Http;
 
@@ -7,24 +8,30 @@ namespace PushyFinder.Delivery;
 
 public class SimplepushDelivery : IDelivery
 {
+    private readonly Configuration configuration;
+    private readonly IPluginLog pluginLog;
+    
+    public SimplepushDelivery(Configuration configuration, IPluginLog pluginLog)
+    {
+        this.configuration = configuration;
+        this.pluginLog = pluginLog;
+    }
+    
     public bool IsActive =>
-        !Plugin.Configuration.SimplepushKey.IsNullOrWhitespace();
+        !configuration.SimplepushKey.IsNullOrWhitespace();
 
     public void Deliver(string title, string text)
     {
+        if (!IsActive) return;
         Task.Run(() => DeliverAsync(title, text));
     }
 
-    private static async Task DeliverAsync(string title, string text)
+    private async Task DeliverAsync(string title, string text)
     {
-        var key = Plugin.Configuration.SimplepushKey;
-        var configuredTitle = Plugin.Configuration.SimplepushTitle;
-        var eventParam = Plugin.Configuration.SimplepushEvent;
+        var key = configuration.SimplepushKey;
+        var configuredTitle = configuration.SimplepushTitle;
+        var eventParam = configuration.SimplepushEvent;
 
-        if (key.IsNullOrWhitespace())
-            return;
-
-        // Use passed-in title if available, otherwise fallback to configured title
         var finalTitle = string.IsNullOrWhiteSpace(title) ? configuredTitle ?? "FFXIV Notification" : title;
 
         try
@@ -38,17 +45,18 @@ public class SimplepushDelivery : IDelivery
                 request = request.SetQueryParam("event", eventParam);
 
             await request.GetAsync();
-            Service.PluginLog.Debug("Sent Simplepush message");
+            pluginLog.Debug("Sent Simplepush message");
         }
         catch (FlurlHttpException e)
         {
-            Service.PluginLog.Error($"Failed to send Simplepush message: '{e.Message}'");
-            Service.PluginLog.Error($"{e.StackTrace}");
+            var responseBody = await e.GetResponseStringAsync();
+            pluginLog.Error($"Failed to send Simplepush message: '{e.Message}'");
+            pluginLog.Error($"Simplepush API response: {responseBody}");
         }
         catch (ArgumentException e)
         {
-            Service.PluginLog.Error($"Invalid argument: {e.Message}");
-            Service.PluginLog.Error($"{e.StackTrace}");
+            pluginLog.Error($"Invalid argument: {e.Message}");
+            pluginLog.Error($"{e.StackTrace}");
         }
     }
 }

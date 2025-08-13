@@ -2,6 +2,7 @@ using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using PushyFinder.Delivery;
 using PushyFinder.Impl;
 using PushyFinder.Util;
 using PushyFinder.Windows;
@@ -15,14 +16,16 @@ public sealed class Plugin : IDalamudPlugin
 
     private IDalamudPluginInterface PluginInterface { get; init; }
     private ICommandManager CommandManager { get; init; }
+    private Service Service { get; init; }
 
-    // This *is* used.
     private readonly PartyListener partyListener;
     private readonly DutyListener dutyListener;
+    private readonly CharacterUtil characterUtil;
+    private readonly CrossWorldPartyListSystem crossWorldPartyListSystem;
+    private readonly MasterDelivery masterDelivery;
+    private readonly LuminaDataUtil luminaDataUtil;
 
-#pragma warning disable CS8618
-    public static Configuration Configuration { get; private set; }
-#pragma warning restore
+    public Configuration Configuration { get; private set; }
 
     public WindowSystem WindowSystem = new("PushyFinder");
 
@@ -32,19 +35,32 @@ public sealed class Plugin : IDalamudPlugin
         IDalamudPluginInterface pluginInterface,
         ICommandManager commandManager,
         IClientState clientState,
+        IPartyList partyList,
+        IFramework framework,
+        IChatGui chatGui,
+        IDataManager dataManager,
         IPluginLog pluginLog)
     {
-        pluginInterface.Create<Service>();
-
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
         
-        CharacterUtil.Initialize(clientState);
+        Service = new Service(pluginInterface, commandManager, clientState, partyList, framework, chatGui, dataManager, pluginLog);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
+        
+        characterUtil = new CharacterUtil(clientState, Configuration);
+        luminaDataUtil = new LuminaDataUtil(dataManager);
+        
+        masterDelivery = new MasterDelivery(new IDelivery[]
+        {
+            new PushoverDelivery(Configuration, pluginLog),
+            new NtfyDelivery(Configuration, pluginLog),
+            new SimplepushDelivery(Configuration, pluginLog),
+            new DiscordDelivery(Configuration, pluginLog)
+        });
 
-        ConfigWindow = new ConfigWindow(this);
+        ConfigWindow = new ConfigWindow(Configuration, masterDelivery, characterUtil);
 
         WindowSystem.AddWindow(ConfigWindow);
 
@@ -55,12 +71,13 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw += DrawUI;
         PluginInterface.UiBuilder.OpenMainUi += DrawConfigUI;
-        PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI; // Added this line
+        PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 
-        partyListener = new PartyListener(pluginLog);
-        dutyListener = new DutyListener(clientState, pluginLog);
+        crossWorldPartyListSystem = new CrossWorldPartyListSystem(framework, clientState);
+        partyListener = new PartyListener(pluginLog, characterUtil, crossWorldPartyListSystem, masterDelivery, luminaDataUtil);
+        dutyListener = new DutyListener(clientState, pluginLog, characterUtil, masterDelivery, Configuration);
 
-        CrossWorldPartyListSystem.Start();
+        crossWorldPartyListSystem.Start();
         
         partyListener.On();
         dutyListener.On();
@@ -73,9 +90,9 @@ public sealed class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.Draw -= DrawUI;
         PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
-        PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI; // Added this line
+        PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 
-        CrossWorldPartyListSystem.Stop();
+        crossWorldPartyListSystem.Stop();
         
         partyListener.Off();
         dutyListener.Off();
@@ -87,7 +104,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         if (args == "debugOnlineStatus")
         {
-            Service.ChatGui.Print($"OnlineStatus ID = {Service.ClientState.LocalPlayer!.OnlineStatus.RowId}");
+            this.Service.ChatGui.Print($"OnlineStatus ID = {this.Service.ClientState.LocalPlayer!.OnlineStatus.RowId}");
             return;
         }
 

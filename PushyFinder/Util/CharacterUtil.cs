@@ -2,27 +2,28 @@ using Dalamud.Plugin.Services;
 
 namespace PushyFinder.Util;
 
-public static class CharacterUtil // Make the class static
+public class CharacterUtil
 {
-    private static IClientState ClientState { get; set; } = null!;
+    private readonly IClientState clientState;
+    private readonly Configuration configuration;
 
-    // Change the constructor to a static Initialize method
-    public static void Initialize(IClientState clientState)
+    public CharacterUtil(IClientState clientState, Configuration configuration)
     {
-        ClientState = clientState;
+        this.clientState = clientState;
+        this.configuration = configuration;
     }
-    
-    public static bool IsClientAfk()
+
+    public bool IsClientAfk()
     {
-        if (Plugin.Configuration.IgnoreAfkStatus)
+        if (configuration.IgnoreAfkStatus)
             return true;
 
-        if (!ClientState.IsLoggedIn ||
-            ClientState.LocalPlayer == null)
+        if (!clientState.IsLoggedIn ||
+            clientState.LocalPlayer == null)
             return false;
         // 17 = AFK, 18 = Camera Mode (should catch idle camera. also has the effect of catching gpose!)
         // update 26/11/2024 (patch 7.11): the above IDs are still correct - not sure how long it'll persist
         // considering the game likes to change these every once in a while
-        return ClientState.LocalPlayer.OnlineStatus.RowId is 17 or 18;
+        return clientState.LocalPlayer.OnlineStatus.RowId is 17 or 18;
     }
 }

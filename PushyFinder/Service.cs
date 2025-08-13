@@ -1,4 +1,3 @@
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
@@ -6,27 +5,32 @@ namespace PushyFinder;
 
 public class Service
 {
-    [PluginService]
-    public static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
+    public IDalamudPluginInterface PluginInterface { get; }
+    public ICommandManager CommandManager { get; }
+    public IClientState ClientState { get; }
+    public IPartyList PartyList { get; }
+    public IFramework Framework { get; }
+    public IChatGui ChatGui { get; }
+    public IDataManager DataManager { get; }
+    public IPluginLog PluginLog { get; }
 
-    [PluginService]
-    public static ICommandManager CommandManager { get; private set; } = null!;
-
-    [PluginService]
-    public static IClientState ClientState { get; private set; } = null!;
-
-    [PluginService]
-    public static IPartyList PartyList { get; private set; } = null!;
-
-    [PluginService]
-    public static IFramework Framework { get; private set; } = null!;
-
-    [PluginService]
-    public static IChatGui ChatGui { get; private set; } = null!;
-
-    [PluginService]
-    public static IDataManager DataManager { get; private set; } = null!;
-
-    [PluginService]
-    public static IPluginLog PluginLog { get; private set; } = null!;
+    public Service(
+        IDalamudPluginInterface pluginInterface,
+        ICommandManager commandManager,
+        IClientState clientState,
+        IPartyList partyList,
+        IFramework framework,
+        IChatGui chatGui,
+        IDataManager dataManager,
+        IPluginLog pluginLog)
+    {
+        PluginInterface = pluginInterface;
+        CommandManager = commandManager;
+        ClientState = clientState;
+        PartyList = partyList;
+        Framework = framework;
+        ChatGui = chatGui;
+        DataManager = dataManager;
+        PluginLog = pluginLog;
+    }
 }

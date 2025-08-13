@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Flurl.Http;
 
@@ -9,35 +10,45 @@ public class PushoverDelivery : IDelivery
 {
     public static readonly string PushoverApi = "https://api.pushover.net/1/messages.json";
 
-    public bool IsActive => !Plugin.Configuration.PushoverAppKey.IsNullOrWhitespace() &&
-                            !Plugin.Configuration.PushoverDevice.IsNullOrWhitespace() &&
-                            !Plugin.Configuration.PushoverUserKey.IsNullOrWhitespace();
+    private readonly Configuration configuration;
+    private readonly IPluginLog pluginLog;
+
+    public PushoverDelivery(Configuration configuration, IPluginLog pluginLog)
+    {
+        this.configuration = configuration;
+        this.pluginLog = pluginLog;
+    }
+
+    public bool IsActive => !configuration.PushoverAppKey.IsNullOrWhitespace() &&
+                            !configuration.PushoverDevice.IsNullOrWhitespace() &&
+                            !configuration.PushoverUserKey.IsNullOrWhitespace();
 
     public void Deliver(string title, string text)
     {
+        if (!IsActive) return;
         Task.Run(() => DeliverAsync(title, text));
     }
 
-    private static async Task DeliverAsync(string title, string text)
+    private async Task DeliverAsync(string title, string text)
     {
         var args = new Dictionary<string, string>
         {
-            { "token", Plugin.Configuration.PushoverAppKey },
-            { "user", Plugin.Configuration.PushoverUserKey },
-            { "device", Plugin.Configuration.PushoverDevice },
+            { "token", configuration.PushoverAppKey },
+            { "user", configuration.PushoverUserKey },
+            { "device", configuration.PushoverDevice },
             { "title", title },
             { "message", text }
         };
 
         try
         {
-            await PushoverApi.PostJsonAsync(args);
-            Service.PluginLog.Debug("Sent Pushover message");
+            await PushoverApi.PostUrlEncodedAsync(args);
+            pluginLog.Debug("Sent Pushover message");
         }
         catch (FlurlHttpException e)
         {
-            Service.PluginLog.Error($"Failed to make Pushover request: '{e.Message}'");
-            Service.PluginLog.Error($"{e.StackTrace}");
+            pluginLog.Error($"Failed to make Pushover request: '{e.Message}'");
+            pluginLog.Error($"{e.StackTrace}");
         }
     }
 }

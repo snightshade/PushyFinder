@@ -7,10 +7,18 @@ namespace PushyFinder.Impl;
 public class PartyListener
 {
     private IPluginLog PluginLog { get; init; }
+    private CharacterUtil CharacterUtil { get; init; }
+    private CrossWorldPartyListSystem CrossWorldPartyListSystem { get; init; }
+    private MasterDelivery MasterDelivery { get; init; }
+    private LuminaDataUtil LuminaDataUtil { get; init; }
 
-    public PartyListener(IPluginLog pluginLog)
+    public PartyListener(IPluginLog pluginLog, CharacterUtil characterUtil, CrossWorldPartyListSystem crossWorldPartyListSystem, MasterDelivery masterDelivery, LuminaDataUtil luminaDataUtil)
     {
         PluginLog = pluginLog;
+        CharacterUtil = characterUtil;
+        CrossWorldPartyListSystem = crossWorldPartyListSystem;
+        MasterDelivery = masterDelivery;
+        LuminaDataUtil = luminaDataUtil;
     }
     
     public void On()
@@ -31,16 +39,16 @@ public class PartyListener
     {
         if (!CharacterUtil.IsClientAfk()) return;
 
-        var jobAbbr = LuminaDataUtil.GetJobAbbreviation(m.JobId);
+        var jobAbbr = this.LuminaDataUtil.GetJobAbbreviation(m.JobId);
 
         if (m.PartyCount == 8)
         {
-            MasterDelivery.Deliver("Party full",
+            this.MasterDelivery.Deliver("Party full",
                                    $"{m.Name} (Lv{m.Level} {jobAbbr}) joins the party.\nParty recruitment ended. All spots have been filled.");
         }
         else
         {
-            MasterDelivery.Deliver($"{m.PartyCount}/8: Party join",
+            this.MasterDelivery.Deliver($"{m.PartyCount}/8: Party join",
                                    $"{m.Name} (Lv{m.Level} {jobAbbr}) joins the party.");
         }
     }
@@ -49,9 +57,9 @@ public class PartyListener
     {
         if (!CharacterUtil.IsClientAfk()) return;
 
-        var jobAbbr = LuminaDataUtil.GetJobAbbreviation(m.JobId);
+        var jobAbbr = this.LuminaDataUtil.GetJobAbbreviation(m.JobId);
 
-        MasterDelivery.Deliver($"{m.PartyCount - 1}/8: Party leave",
+        this.MasterDelivery.Deliver($"{m.PartyCount - 1}/8: Party leave",
                                $"{m.Name} (Lv{m.Level} {jobAbbr}) has left the party.");
     }
 }

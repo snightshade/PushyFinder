@@ -10,11 +10,17 @@ public class DutyListener
 {
     private IClientState ClientState { get; init; }
     private IPluginLog PluginLog { get; init; }
+    private CharacterUtil CharacterUtil { get; init; }
+    private MasterDelivery MasterDelivery { get; init; }
+    private Configuration Configuration { get; init; }
 
-    public DutyListener(IClientState clientState, IPluginLog pluginLog)
+    public DutyListener(IClientState clientState, IPluginLog pluginLog, CharacterUtil characterUtil, MasterDelivery masterDelivery, Configuration configuration)
     {
         ClientState = clientState;
         PluginLog = pluginLog;
+        CharacterUtil = characterUtil;
+        MasterDelivery = masterDelivery;
+        Configuration = configuration;
     }
     
     public void On()
@@ -31,13 +37,13 @@ public class DutyListener
 
     private void OnDutyPop(ContentFinderCondition e)
     {
-        if (!Plugin.Configuration.EnableForDutyPops)
+        if (!Configuration.EnableForDutyPops)
             return;
 
         if (!CharacterUtil.IsClientAfk())
             return;
 
         var dutyName = e.RowId == 0 ? "Duty Roulette" : e.Name.ToDalamudString().TextValue;
-        MasterDelivery.Deliver("Duty pop", $"Duty registered: '{dutyName}'.");
+        this.MasterDelivery.Deliver("Duty pop", $"Duty registered: '{dutyName}'.");
     }
 }
