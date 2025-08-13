@@ -16,7 +16,10 @@ public sealed class Plugin : IDalamudPlugin
     private IDalamudPluginInterface PluginInterface { get; init; }
     private ICommandManager CommandManager { get; init; }
 
-    // This *is* used.
+        // This *is* used.
+    private readonly PartyListener partyListener;
+    private readonly DutyListener dutyListener;
+
 #pragma warning disable CS8618
     public static Configuration Configuration { get; private set; }
 #pragma warning restore
@@ -27,12 +30,16 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin(
         IDalamudPluginInterface pluginInterface,
-        ICommandManager commandManager)
+        ICommandManager commandManager,
+        IClientState clientState,
+        IPluginLog pluginLog)
     {
         pluginInterface.Create<Service>();
 
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
+        
+        CharacterUtil.Initialize(clientState);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
@@ -47,22 +54,31 @@ public sealed class Plugin : IDalamudPlugin
         });
 
         PluginInterface.UiBuilder.Draw += DrawUI;
-        PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+        PluginInterface.UiBuilder.OpenMainUi += DrawConfigUI;
+        PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI; // Added this line
+
+        partyListener = new PartyListener(pluginLog);
+        dutyListener = new DutyListener(clientState, pluginLog);
 
         CrossWorldPartyListSystem.Start();
-        PartyListener.On();
-        DutyListener.On();
+        
+        partyListener.On();
+        dutyListener.On();
     }
 
     public void Dispose()
     {
         WindowSystem.RemoveAllWindows();
-
         ConfigWindow.Dispose();
 
+        PluginInterface.UiBuilder.Draw -= DrawUI;
+        PluginInterface.UiBuilder.OpenMainUi -= DrawConfigUI;
+        PluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI; // Added this line
+
         CrossWorldPartyListSystem.Stop();
-        PartyListener.Off();
-        DutyListener.Off();
+        
+        partyListener.Off();
+        dutyListener.Off();
 
         CommandManager.RemoveHandler(CommandName);
     }

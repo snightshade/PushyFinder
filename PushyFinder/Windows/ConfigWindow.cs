@@ -1,8 +1,10 @@
 using System;
 using System.Numerics;
+using System.Text;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
+
 using PushyFinder.Delivery;
 using PushyFinder.Util;
 
@@ -28,15 +30,30 @@ public class ConfigWindow : Window, IDisposable
     {
         {
             var cfg = Configuration.PushoverAppKey;
-            if (ImGui.InputText("Application key", ref cfg, 2048u)) Configuration.PushoverAppKey = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Application key", buffer))
+            {
+                Configuration.PushoverAppKey = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.PushoverUserKey;
-            if (ImGui.InputText("User key", ref cfg, 2048u)) Configuration.PushoverUserKey = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("User key", buffer))
+            {
+                Configuration.PushoverUserKey = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.PushoverDevice;
-            if (ImGui.InputText("Device name", ref cfg, 2048u)) Configuration.PushoverDevice = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Device name", buffer))
+            {
+                Configuration.PushoverDevice = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
     }
 
@@ -44,15 +61,30 @@ public class ConfigWindow : Window, IDisposable
     {
         {
             var cfg = Configuration.NtfyServer;
-            if (ImGui.InputText("Server", ref cfg, 2048u)) Configuration.NtfyServer = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Server", buffer))
+            {
+                Configuration.NtfyServer = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.NtfyTopic;
-            if (ImGui.InputText("Topic", ref cfg, 2048u)) Configuration.NtfyTopic = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Topic", buffer))
+            {
+                Configuration.NtfyTopic = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.NtfyToken;
-            if (ImGui.InputText("Token (if exists)", ref cfg, 2048u)) Configuration.NtfyToken = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Token (if exists)", buffer))
+            {
+                Configuration.NtfyToken = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
     }
 
@@ -60,15 +92,30 @@ public class ConfigWindow : Window, IDisposable
     {
         {
             var cfg = Configuration.SimplepushKey;
-            if (ImGui.InputText("Key (required)", ref cfg, 2048u)) Configuration.SimplepushKey = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Key (required)", buffer))
+            {
+                Configuration.SimplepushKey = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.SimplepushTitle;
-            if (ImGui.InputText("Title", ref cfg, 2048u)) Configuration.SimplepushTitle = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Title", buffer))
+            {
+                Configuration.SimplepushTitle = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.SimplepushEvent;
-            if (ImGui.InputText("Event", ref cfg, 2048u)) Configuration.SimplepushEvent = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Event", buffer))
+            {
+                Configuration.SimplepushEvent = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
     }
 
@@ -76,11 +123,21 @@ public class ConfigWindow : Window, IDisposable
     {
         {
             var cfg = Configuration.DiscordMessage;
-            if (ImGui.InputText("Message", ref cfg, 2048u)) Configuration.DiscordMessage = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Message", buffer))
+            {
+                Configuration.DiscordMessage = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.DiscordWebhookToken;
-            if (ImGui.InputText("Webhook URL", ref cfg, 2048u)) Configuration.DiscordWebhookToken = cfg;
+            var buffer = Encoding.UTF8.GetBytes(cfg);
+            Array.Resize(ref buffer, 2048);
+            if (ImGui.InputText("Webhook URL", buffer))
+            {
+                Configuration.DiscordWebhookToken = Encoding.UTF8.GetString(buffer).TrimEnd((char)0);
+            }
         }
         {
             var cfg = Configuration.DiscordUseEmbed;

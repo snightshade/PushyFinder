@@ -1,3 +1,4 @@
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Excel.Sheets;
 using PushyFinder.Delivery;
@@ -7,19 +8,28 @@ namespace PushyFinder.Impl;
 
 public class DutyListener
 {
-    public static void On()
+    private IClientState ClientState { get; init; }
+    private IPluginLog PluginLog { get; init; }
+
+    public DutyListener(IClientState clientState, IPluginLog pluginLog)
     {
-        Service.PluginLog.Debug("DutyListener On");
-        Service.ClientState.CfPop += OnDutyPop;
+        ClientState = clientState;
+        PluginLog = pluginLog;
+    }
+    
+    public void On()
+    {
+        PluginLog.Debug("DutyListener On");
+        ClientState.CfPop += OnDutyPop;
     }
 
-    public static void Off()
+    public void Off()
     {
-        Service.PluginLog.Debug("DutyListener Off");
-        Service.ClientState.CfPop -= OnDutyPop;
+        PluginLog.Debug("DutyListener Off");
+        ClientState.CfPop -= OnDutyPop;
     }
 
-    private static void OnDutyPop(ContentFinderCondition e)
+    private void OnDutyPop(ContentFinderCondition e)
     {
         if (!Plugin.Configuration.EnableForDutyPops)
             return;

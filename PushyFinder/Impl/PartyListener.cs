@@ -1,25 +1,33 @@
+using Dalamud.Plugin.Services;
 using PushyFinder.Delivery;
 using PushyFinder.Util;
 
 namespace PushyFinder.Impl;
 
-public static class PartyListener
+public class PartyListener
 {
-    public static void On()
+    private IPluginLog PluginLog { get; init; }
+
+    public PartyListener(IPluginLog pluginLog)
     {
-        Service.PluginLog.Debug("PartyListener On");
+        PluginLog = pluginLog;
+    }
+    
+    public void On()
+    {
+        PluginLog.Debug("PartyListener On");
         CrossWorldPartyListSystem.OnJoin += OnJoin;
         CrossWorldPartyListSystem.OnLeave += OnLeave;
     }
 
-    public static void Off()
+    public void Off()
     {
-        Service.PluginLog.Debug("PartyListener Off");
+        PluginLog.Debug("PartyListener Off");
         CrossWorldPartyListSystem.OnJoin -= OnJoin;
         CrossWorldPartyListSystem.OnLeave -= OnLeave;
     }
 
-    private static void OnJoin(CrossWorldPartyListSystem.CrossWorldMember m)
+    private void OnJoin(CrossWorldPartyListSystem.CrossWorldMember m)
     {
         if (!CharacterUtil.IsClientAfk()) return;
 
@@ -37,7 +45,7 @@ public static class PartyListener
         }
     }
 
-    private static void OnLeave(CrossWorldPartyListSystem.CrossWorldMember m)
+    private void OnLeave(CrossWorldPartyListSystem.CrossWorldMember m)
     {
         if (!CharacterUtil.IsClientAfk()) return;
 
