@@ -16,7 +16,7 @@ public sealed class Plugin : IDalamudPlugin
     private IDalamudPluginInterface PluginInterface { get; init; }
     private ICommandManager CommandManager { get; init; }
 
-        // This *is* used.
+    // This *is* used.
     private readonly PartyListener partyListener;
     private readonly DutyListener dutyListener;
 
