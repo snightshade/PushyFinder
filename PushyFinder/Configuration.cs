@@ -19,6 +19,9 @@ public class Configuration : IPluginConfiguration
     public string NtfyServer { get; set; } = "https://ntfy.sh/";
     public string NtfyTopic { get; set; } = "";
     public string NtfyToken { get; set; } = "";
+    public string SimplepushKey { get; set; } = "";
+    public string SimplepushTitle { get; set; } = "";
+    public string SimplepushEvent { get; set; } = "";
     public bool EnableForDutyPops { get; set; } = true;
     public bool IgnoreAfkStatus { get; set; } = false;
     public bool DiscordUseEmbed { get; set; } = true;

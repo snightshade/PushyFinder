@@ -14,7 +14,8 @@ public static class MasterDelivery
     [
         new PushoverDelivery(),
         new NtfyDelivery(),
-        new DiscordDelivery()
+        new DiscordDelivery(),
+        new SimplepushDelivery()
     ];
 
     public static void Deliver(string title, string text)
