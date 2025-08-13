@@ -2,16 +2,16 @@ using System;
 using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui; 
 using PushyFinder.Delivery;
 using PushyFinder.Util;
+using System.Text;
 
 namespace PushyFinder.Windows;
 
 public class ConfigWindow : Window, IDisposable
 {
     private readonly Configuration Configuration;
-
     private readonly TimedBool notifSentMessageTimer = new(3.0f);
 
     public ConfigWindow(Plugin plugin) : base(
@@ -26,46 +26,36 @@ public class ConfigWindow : Window, IDisposable
 
     private void DrawPushoverConfig()
     {
-        {
-            var cfg = Configuration.PushoverAppKey;
-            if (ImGui.InputText("Application key", ref cfg, 2048u)) Configuration.PushoverAppKey = cfg;
-        }
-        {
-            var cfg = Configuration.PushoverUserKey;
-            if (ImGui.InputText("User key", ref cfg, 2048u)) Configuration.PushoverUserKey = cfg;
-        }
-        {
-            var cfg = Configuration.PushoverDevice;
-            if (ImGui.InputText("Device name", ref cfg, 2048u)) Configuration.PushoverDevice = cfg;
-        }
+        var pushoverAppKey = Configuration.PushoverAppKey ?? "";
+        if (ImGui.InputText("Application key", ref pushoverAppKey, 2048)) Configuration.PushoverAppKey = pushoverAppKey;
+
+        var pushoverUserKey = Configuration.PushoverUserKey ?? "";
+        if (ImGui.InputText("User key", ref pushoverUserKey, 2048)) Configuration.PushoverUserKey = pushoverUserKey;
+        
+        var pushoverDevice = Configuration.PushoverDevice ?? "";
+        if (ImGui.InputText("Device name", ref pushoverDevice, 2048)) Configuration.PushoverDevice = pushoverDevice;
     }
 
     private void DrawNtfyConfig()
     {
-        {
-            var cfg = Configuration.NtfyServer;
-            if (ImGui.InputText("Server", ref cfg, 2048u)) Configuration.NtfyServer = cfg;
-        }
-        {
-            var cfg = Configuration.NtfyTopic;
-            if (ImGui.InputText("Topic", ref cfg, 2048u)) Configuration.NtfyTopic = cfg;
-        }
-        {
-            var cfg = Configuration.NtfyToken;
-            if (ImGui.InputText("Token (if exists)", ref cfg, 2048u)) Configuration.NtfyToken = cfg;
-        }
+        var ntfyServer = Configuration.NtfyServer ?? "";
+        if (ImGui.InputText("Server", ref ntfyServer, 2048)) Configuration.NtfyServer = ntfyServer;
+
+        var ntfyTopic = Configuration.NtfyTopic ?? "";
+        if (ImGui.InputText("Topic", ref ntfyTopic, 2048)) Configuration.NtfyTopic = ntfyTopic;
+
+        var ntfyToken = Configuration.NtfyToken ?? "";
+        if (ImGui.InputText("Token (if exists)", ref ntfyToken, 2048)) Configuration.NtfyToken = ntfyToken;
     }
 
     private void DrawDiscordConfig()
     {
-        {
-            var cfg = Configuration.DiscordMessage;
-            if (ImGui.InputText("Message", ref cfg, 2048u)) Configuration.DiscordMessage = cfg;
-        }
-        {
-            var cfg = Configuration.DiscordWebhookToken;
-            if (ImGui.InputText("Webhook URL", ref cfg, 2048u)) Configuration.DiscordWebhookToken = cfg;
-        }
+        var discordMessage = Configuration.DiscordMessage ?? "";
+        if (ImGui.InputText("Message", ref discordMessage, 2048)) Configuration.DiscordMessage = discordMessage;
+
+        var discordWebhookToken = Configuration.DiscordWebhookToken ?? "";
+        if (ImGui.InputText("Webhook URL", ref discordWebhookToken, 2048)) Configuration.DiscordWebhookToken = discordWebhookToken;
+        
         {
             var cfg = Configuration.DiscordUseEmbed;
             if (ImGui.Checkbox("Use embeds?", ref cfg)) Configuration.DiscordUseEmbed = cfg;
