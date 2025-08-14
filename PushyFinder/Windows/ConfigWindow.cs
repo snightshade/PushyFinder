@@ -36,6 +36,16 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.InputText("Device name", ref pushoverDevice, 2048)) Configuration.PushoverDevice = pushoverDevice;
     }
 
+    private void DrawSimplepushConfig()
+    {
+        var simplepushKey = Configuration.SimplepushKey ?? "";
+        if (ImGui.InputText("Key", ref simplepushKey, 2048)) Configuration.SimplepushKey = simplepushKey;
+        var simplepushTitle = Configuration.SimplepushTitle ?? "";
+        if (ImGui.InputText("Title (optional)", ref simplepushTitle, 2048)) Configuration.SimplepushTitle = simplepushTitle;
+        var simplepushEvent = Configuration.SimplepushEvent ?? "";
+        if (ImGui.InputText("Event (optional)", ref simplepushEvent, 2048)) Configuration.SimplepushEvent = simplepushEvent;
+    }
+
     private void DrawNtfyConfig()
     {
         var ntfyServer = Configuration.NtfyServer ?? "";
@@ -83,6 +93,10 @@ public class ConfigWindow : Window, IDisposable
                 using (var pushoverTab = ImRaii.TabItem("Pushover"))
                 {
                     if (pushoverTab) DrawPushoverConfig();
+                }
+                using (var simplepushTab = ImRaii.TabItem("Simplepush"))
+                {
+                    if (simplepushTab) DrawSimplepushConfig();
                 }
                 using (var ntfyTab = ImRaii.TabItem("Ntfy"))
                 {

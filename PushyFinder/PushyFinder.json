@@ -2,7 +2,7 @@
   "Author": "Nightshade System",
   "Name": "PushyFinder",
   "Punchline": "Mobile push notifications for the Party Finder.",
-  "Description": "A plugin that uses Pushover (https://pushover.net), Discord, or Ntfy (https://ntfy.sh) to send mobile push notifications when party members join or leave, or when a duty finder queue is initiated.",
+  "Description": "A plugin that uses Pushover (https://pushover.net), Discord, SimplePush (http://simplepush.io), or Ntfy (https://ntfy.sh) to send mobile push notifications when party members join or leave, or when a duty finder queue is initiated.",
   "InternalName": "PushyFinder",
   "ApplicableVersion": "any",
   "Tags": [
